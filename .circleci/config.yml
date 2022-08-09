@@ -93,9 +93,9 @@ jobs:
             pip3 install --user cibuildwheel==2.8.1 build Cython twine
             python3 -m build --outdir ./wheelhouse
             if [[ -n $(git show --name-only ${CIRCLE_SHA1} ./acurl) ]]; then
-              # `pip index versions acurl` will find the latest version for the platform and python version where the command is ran
+              # `pip3 index versions acurl` will find the latest version for the platform and python version where the command is ran
               # 
-              LATEST_PYPI_VERSION=$(pip index versions acurl | grep LATEST | sed 's/.*LATEST:[[:space:]]*\(.*\)$/\1/g')
+              LATEST_PYPI_VERSION=$(pip3 index versions acurl | grep LATEST | sed 's/.*LATEST:[[:space:]]*\(.*\)$/\1/g')
 
               if [[ -n $(grep "version = $LATEST_PYPI_VERSION" acurl/setup.cfg) ]]; then
                 echo "Version of acurl hasn't changed"
@@ -133,7 +133,7 @@ jobs:
           command: |
             pip3 install cibuildwheel==2.8.1 Cython twine
             if [[ -n $(git show --name-only ${CIRCLE_SHA1} ./acurl) ]]; then
-              LATEST_PYPI_VERSION=$(pip index versions acurl | grep LATEST | sed 's/.*LATEST:[[:space:]]*\(.*\)$/\1/g')
+              LATEST_PYPI_VERSION=$(pip3 index versions acurl | grep LATEST | sed 's/.*LATEST:[[:space:]]*\(.*\)$/\1/g')
 
               if [[ -n $(grep "version = $LATEST_PYPI_VERSION" acurl/setup.cfg) ]]; then
                 echo "Version of acurl hasn't changed"
