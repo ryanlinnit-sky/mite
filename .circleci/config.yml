@@ -91,6 +91,7 @@ jobs:
           name: Build the Linux wheels.
           command: |
             pip3 install --user cibuildwheel==2.8.1 build Cython twine
+            pip3 install --upgrade pip
             python3 -m build --outdir ./wheelhouse
             if [[ -n $(git show --name-only ${CIRCLE_SHA1} ./acurl) ]]; then
               # `pip3 index versions acurl` will find the latest version for the platform and python version where the command is ran
@@ -132,6 +133,7 @@ jobs:
           name: Build the OS X wheels.
           command: |
             pip3 install cibuildwheel==2.8.1 Cython twine
+            pip3 install --upgrade pip
             if [[ -n $(git show --name-only ${CIRCLE_SHA1} ./acurl) ]]; then
               LATEST_PYPI_VERSION=$(pip3 index versions acurl | grep LATEST | sed 's/.*LATEST:[[:space:]]*\(.*\)$/\1/g')
 
