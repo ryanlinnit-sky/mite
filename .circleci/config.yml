@@ -42,6 +42,10 @@ workflows:
               only: master
 
 
+orbs:
+  jq: circleci/jq@2.2.0
+
+
 jobs:
   build-and-test:
     docker:
@@ -86,19 +90,20 @@ jobs:
       CIBW_SKIP: "*i686"
     steps:
       - checkout
+      - jq/install
       - setup_remote_docker
       - run:
           name: Build the Linux wheels.
           command: |
             pip3 install --user cibuildwheel==2.8.1 build Cython twine
-            pip3 install --upgrade pip
             python3 -m build --outdir ./wheelhouse
             if [[ -n $(git show --name-only ${CIRCLE_SHA1} ./acurl) ]]; then
               # `pip3 index versions acurl` will find the latest version for the platform and python version where the command is ran
               # 
-              LATEST_PYPI_VERSION=$(pip3 index versions acurl | grep LATEST | sed 's/.*LATEST:[[:space:]]*\(.*\)$/\1/g')
+              LATEST_ACURL_VERSION=$(curl https://pypi.org/pypi/acurl/json | jq '.info .version')
+              # LATEST_PYPI_VERSION=$(pip3 index versions acurl | grep LATEST | sed 's/.*LATEST:[[:space:]]*\(.*\)$/\1/g')
 
-              if [[ -n $(grep "version = $LATEST_PYPI_VERSION" acurl/setup.cfg) ]]; then
+              if [[ -n $(grep "version = $LATEST_ACURL_VERSION" acurl/setup.cfg) ]]; then
                 echo "Version of acurl hasn't changed"
                 exit 1
               fi
@@ -129,15 +134,16 @@ jobs:
       # I hate apple 🍏
     steps:
       - checkout
+      - jq/install
       - run:
           name: Build the OS X wheels.
           command: |
             pip3 install cibuildwheel==2.8.1 Cython twine
-            pip3 install --upgrade pip
             if [[ -n $(git show --name-only ${CIRCLE_SHA1} ./acurl) ]]; then
-              LATEST_PYPI_VERSION=$(pip3 index versions acurl | grep LATEST | sed 's/.*LATEST:[[:space:]]*\(.*\)$/\1/g')
+              LATEST_ACURL_VERSION=$(curl https://pypi.org/pypi/acurl/json | jq '.info .version')
+              # LATEST_PYPI_VERSION=$(pip3 index versions acurl | grep LATEST | sed 's/.*LATEST:[[:space:]]*\(.*\)$/\1/g')
 
-              if [[ -n $(grep "version = $LATEST_PYPI_VERSION" acurl/setup.cfg) ]]; then
+              if [[ -n $(grep "version = $LATEST_ACURL_VERSION" acurl/setup.cfg) ]]; then
                 echo "Version of acurl hasn't changed"
                 exit 1
               fi
