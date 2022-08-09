@@ -12,26 +12,31 @@ orbs:
 # - documentation coverage
 # - docs build (on master only)
 
+# [TODO]
+# - Include acurl source distribution
+# - Build acurl arm64 wheel
+# - Check if version of acurl has increased..
+
 
 workflows:
   mite:
     jobs:
-      - build-and-test
-      - tag:
-          requires:
-            - build-and-test
-          filters:
-            branches:
-              only: master
+      # - build-and-test
+      # - tag:
+      #     requires:
+      #       - build-and-test
+      #     filters:
+      #       branches:
+      #         only: master
       - linux-wheels:
-          requires:
-            - tag
+      #     requires:
+      #       - tag
           filters:
             branches:
               only: master
       - osx-wheels:
-          requires:
-            - tag
+          # requires:
+          #   - tag
           filters:
             branches:
               only: master
@@ -87,16 +92,29 @@ jobs:
           command: |
             pip3 install --user cibuildwheel==2.8.1 build Cython twine
             python3 -m build --outdir ./wheelhouse
-            cd acurl && cibuildwheel --output-dir ../wheelhouse
-      - run:
-          name: init .pypirc
-          command: |
-            echo -e "[pypi]" >> ~/.pypirc
-            echo -e "username = __token__" >> ~/.pypirc
-            echo -e "password = $PYPI_PASSWORD" >> ~/.pypirc
-      - run:
-          name: upload packages to pypi
-          command: twine upload wheelhouse/*
+            if [[ -n $(git show --name-only ${CIRCLE_SHA1} ./acurl) ]]; then
+              # `pip index versions acurl` will find the latest version for the platform and python version where the command is ran
+              # 
+              LATEST_PYPI_VERSION=$(pip index versions acurl | grep LATEST | sed 's/.*LATEST:[[:space:]]*\(.*\)$/\1/g')
+
+              if [[ -n $(grep "version = $LATEST_PYPI_VERSION" acurl/setup.cfg) ]]; then
+                echo "Version of acurl hasn't changed"
+                exit 1
+              fi
+
+              cd acurl
+              python3 -m build --outdir ../wheelhouse
+              cibuildwheel --output-dir ../wheelhouse
+            fi
+      # - run:
+      #     name: init .pypirc
+      #     command: |
+      #       echo -e "[pypi]" >> ~/.pypirc
+      #       echo -e "username = __token__" >> ~/.pypirc
+      #       echo -e "password = $PYPI_PASSWORD" >> ~/.pypirc
+      # - run:
+      #     name: upload packages to pypi
+      #     command: twine upload wheelhouse/*
       # - store_artifacts:
       #     path: wheelhouse/
 
@@ -104,21 +122,35 @@ jobs:
     working_directory: ~/osx-wheels
     macos:
       xcode: 12.5.1
+      # I don't know what version to go with
+      # https://circleci.com/docs/testing-ios#supported-xcode-versions
+      # 14.0.0 is the latest, just go with that? Which is the most compatible?..
+      # I hate apple 🍏
     steps:
       - checkout
       - run:
           name: Build the OS X wheels.
           command: |
             pip3 install cibuildwheel==2.8.1 Cython twine
-            cd acurl && cibuildwheel --output-dir ../wheelhouse
-      - run:
-          name: init .pypirc
-          command: |
-            echo -e "[pypi]" >> ~/.pypirc
-            echo -e "username = __token__" >> ~/.pypirc
-            echo -e "password = $PYPI_PASSWORD" >> ~/.pypirc
-      - run:
-          name: upload packages to pypi
-          command: twine upload wheelhouse/*
-      # - store_artifacts:
-      #     path: wheelhouse/
+            if [[ -n $(git show --name-only ${CIRCLE_SHA1} ./acurl) ]]; then
+              LATEST_PYPI_VERSION=$(pip index versions acurl | grep LATEST | sed 's/.*LATEST:[[:space:]]*\(.*\)$/\1/g')
+
+              if [[ -n $(grep "version = $LATEST_PYPI_VERSION" acurl/setup.cfg) ]]; then
+                echo "Version of acurl hasn't changed"
+                exit 1
+              fi
+
+              cd acurl
+              cibuildwheel --output-dir ../wheelhouse --archs x86_64,ARM64
+            fi
+      # - run:
+      #     name: init .pypirc
+      #     command: |
+      #       echo -e "[pypi]" >> ~/.pypirc
+      #       echo -e "username = __token__" >> ~/.pypirc
+      #       echo -e "password = $PYPI_PASSWORD" >> ~/.pypirc
+      # - run:
+      #     name: upload packages to pypi
+      #     command: twine upload wheelhouse/*
+      - store_artifacts:
+          path: wheelhouse/
