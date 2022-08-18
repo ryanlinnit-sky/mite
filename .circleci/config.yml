@@ -96,7 +96,8 @@ jobs:
             eval "$(pyenv init -)"
             pyenv global 3.8.13 3.9.13 system
             python3.8 -m pip install -r dev-requirements.txt
-            tox
+            python3.8 -m pip install Cython
+            python3.10 -m tox
 
   tag:
     docker:
