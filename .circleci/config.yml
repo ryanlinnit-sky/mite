@@ -87,7 +87,6 @@ jobs:
           command: |
             pyenv install 3.8.13
             pyenv install 3.9.13
-            pyenv install 3.10.6
       - run:
           name: pre-commit checks
           command: pre-commit run --origin HEAD --source origin/master || git diff
@@ -107,7 +106,7 @@ jobs:
           name: tox 3.10.6
           command: |
             eval "$(pyenv init -)"
-            pyenv global 3.10.6
+            pyenv global system
             tox -e py310
 
   tag:
