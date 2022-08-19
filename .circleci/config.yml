@@ -94,7 +94,7 @@ jobs:
           name: tox
           command: |
             eval "$(pyenv init -)"
-            pyenv global 3.8.13 3.9.13 system
+            pyenv global system 3.8.13 3.9.13
             python3.8 -m pip install -r dev-requirements.txt
             python3.8 -m pip install Cython
             tox
