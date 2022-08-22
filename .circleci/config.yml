@@ -100,7 +100,7 @@ jobs:
             # eval "$(pyenv init -)"
             pyenv local 3.8.13 # 3.9.13
             which python
-            python -m tox
+            python3.10 -m tox
 
   tag:
     docker:
