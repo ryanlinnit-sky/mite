@@ -82,21 +82,23 @@ jobs:
       - python/install-packages:
           pip-dependency-file: dev-requirements.txt
           pkg-manager: pip
+      - python/install-packages:
+          args: tox-pyenv
+          pkg-manager: pip
+          pypi-cache: false
+      - run:
+          name: pre-commit checks
+          command: pre-commit run --origin HEAD --source origin/master || git diff
       - run:
           name: Install Python versions
           command: |
             pyenv install 3.8.13
             pyenv install 3.9.13
       - run:
-          name: pre-commit checks
-          command: pre-commit run --origin HEAD --source origin/master || git diff
-      - run:
           name: tox
           command: |
-            eval "$(pyenv init -)"
-            pyenv global system 3.8.13 3.9.13
-            # python3.8 -m pip install -r dev-requirements.txt
-            # python3.8 -m pip install Cython
+            # eval "$(pyenv init -)"
+            pyenv local 3.8.13 3.9.13
             tox
 
   tag:
