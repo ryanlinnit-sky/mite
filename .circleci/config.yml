@@ -93,7 +93,7 @@ jobs:
           name: Install Python versions
           command: |
             pyenv install 3.8.13
-            pyenv local 3.8.13 # 3.9.13
+            # pyenv local 3.8.13 # 3.9.13
             # pyenv install 3.9.13
       - run:
           name: tox
