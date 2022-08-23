@@ -90,10 +90,6 @@ jobs:
       - python/install-packages:
           pip-dependency-file: dev-requirements.txt
           pkg-manager: pip
-      - python/install-packages:
-          args: tox-pyenv
-          pkg-manager: pip
-          pypi-cache: false
       - run:
           name: pre-commit checks
           command: pre-commit run --origin HEAD --source origin/master || git diff
@@ -113,10 +109,6 @@ jobs:
       - python/install-packages:
           pip-dependency-file: dev-requirements.txt
           pkg-manager: pip
-      - python/install-packages:
-          args: tox-pyenv
-          pkg-manager: pip
-          pypi-cache: false
       - run:
           name: pre-commit checks
           command: pre-commit run --origin HEAD --source origin/master || git diff
@@ -136,10 +128,6 @@ jobs:
       - python/install-packages:
           pip-dependency-file: dev-requirements.txt
           pkg-manager: pip
-      - python/install-packages:
-          args: tox-pyenv
-          pkg-manager: pip
-          pypi-cache: false
       - run:
           name: pre-commit checks
           command: pre-commit run --origin HEAD --source origin/master || git diff
