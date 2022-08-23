@@ -17,12 +17,20 @@ workflows:
   mite:
     jobs:
       - check-acurl-version
-      - build-and-test:
+      - build-and-test-38:
+          requires:
+            - check-acurl-version
+      - build-and-test-39:
+          requires:
+            - check-acurl-version
+      - build-and-test-310:
           requires:
             - check-acurl-version
       - tag:
           requires:
-            - build-and-test
+            - build-and-test-38
+            - build-and-test-39
+            - build-and-test-310
             - check-acurl-version
           filters:
             branches:
@@ -69,7 +77,53 @@ jobs:
           paths:
             - env_vars
 
-  build-and-test:
+  build-and-test-38:
+    docker:
+      - image: cimg/python:3.8
+    steps:
+      - checkout
+      - python/install-packages:
+          pkg-manager: pip
+      - python/install-packages:
+          pip-dependency-file: test-requirements.txt
+          pkg-manager: pip
+      - python/install-packages:
+          pip-dependency-file: dev-requirements.txt
+          pkg-manager: pip
+      - python/install-packages:
+          args: tox-pyenv
+          pkg-manager: pip
+          pypi-cache: false
+      - run:
+          name: pre-commit checks
+          command: pre-commit run --origin HEAD --source origin/master || git diff
+      - run:
+          name: tox
+          command: tox -e py38
+  build-and-test-39:
+    docker:
+      - image: cimg/python:3.9
+    steps:
+      - checkout
+      - python/install-packages:
+          pkg-manager: pip
+      - python/install-packages:
+          pip-dependency-file: test-requirements.txt
+          pkg-manager: pip
+      - python/install-packages:
+          pip-dependency-file: dev-requirements.txt
+          pkg-manager: pip
+      - python/install-packages:
+          args: tox-pyenv
+          pkg-manager: pip
+          pypi-cache: false
+      - run:
+          name: pre-commit checks
+          command: pre-commit run --origin HEAD --source origin/master || git diff
+      - run:
+          name: tox
+          command: tox -e py39
+  build-and-test-310:
     docker:
       - image: cimg/python:3.10
     steps:
@@ -90,14 +144,8 @@ jobs:
           name: pre-commit checks
           command: pre-commit run --origin HEAD --source origin/master || git diff
       - run:
-          name: Install Python versions
-          command: |
-            pyenv install 3.8.13
-            # pyenv local 3.8.13 # 3.9.13
-            # pyenv install 3.9.13
-      - run:
           name: tox
-          command: tox
+          command: tox -e py310
 
   tag:
     docker:
